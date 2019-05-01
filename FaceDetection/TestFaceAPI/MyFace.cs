@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.Azure.CognitiveServices.Vision.Face;
+using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
+using System;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Azure.CognitiveServices.Vision.Face;
-using Microsoft.Azure.CognitiveServices.Vision.Face.Models;
+using WhatsappMessager;
 
 namespace TestFaceAPI
 {
-    class MyFace
+    public class MyFace
     {
         const string subscriptionKey = "69b5a031d4b24aeda9ff5ace088b784f";
         const string faceEndpoint = "https://australiaeast.api.cognitive.microsoft.com/";
@@ -64,13 +63,22 @@ namespace TestFaceAPI
                     if (identifyResult.Candidates.ToArray().Length == 0)
                     {
                         Console.WriteLine("No one identified");
+                        string message = "Hello, An unknown person is waiting at your door";
+                        SpeechProcessor.SpeechProcessorGS.Speak(message);
+
+                        WhatsappSender.Send("");
                     }
                     else
                     {
                         // Get top 1 among all candidates returned
                         var candidateId = identifyResult.Candidates[0].PersonId;
                         var person = await faceClient.PersonGroupPerson.GetAsync(friendGroup, candidateId);
+
+                        string message = $"Hello, {person.Name} is waiting at your door";
+                        SpeechProcessor.SpeechProcessorGS.Speak(message);
+
                         Console.WriteLine("Identified as {0}", person.Name);
+                        WhatsappSender.Send(person.Name);
                     }
                 }
             }
